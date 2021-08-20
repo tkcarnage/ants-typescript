@@ -221,8 +221,8 @@ const AntPage = () => {
           <CalculateButton onPress={() => handlePress(state)}>
             <ButtonText>Calculate</ButtonText>
           </CalculateButton>
-          {state.sort((compare: () => {})).map((test: { name: string, hasRun: boolean, runTest: boolean, winPercentage: null | number, inProgress: boolean }, idx: number) => {
-            const { name, hasRun, runTest, winPercentage, inProgress } = test;
+          {state.sort(compare).map((test: { name: string, hasRun: boolean, winPercentage: null | number, inProgress: boolean }, idx: number) => {
+            const { name, hasRun, winPercentage, inProgress } = test;
             return (
               <AntCalculateItem
                 key={`${name}-${idx}`}
