@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useReducer, useEffect, useState } from 'react';
-import { Text, View, SafeAreaView, ScrollView, ActivityIndicator, Pressable } from 'react-native';
-import { useQuery } from 'urql';
+import { Text, View, SafeAreaView, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { stringifyVariables, useQuery } from 'urql';
 import styled from 'styled-components';
 import AntInfoCard from './AntInfoCard';
 import AntCalculateItem from './AntCalculateItem';
@@ -44,7 +44,7 @@ const ErrorMessage = styled(Text)`
   color: red;
 `;
 
-const CalculateButton = styled(Pressable)`
+const CalculateButton = styled(TouchableOpacity)`
   width: 100%;
   padding: 18px;
   display: flex;
@@ -95,14 +95,14 @@ const reducer = (state, action) => {
     case SET_TESTS:
       return [...action.payload.tests];
     case RUN_TESTS:
-      const arr = state.filter(ant => ant?.name !== action?.payload?.name);
+      const arr = state.filter((ant: { name: string }) => ant?.name !== action?.payload?.name);
       return [...arr,
       {
         name: action?.payload?.name,
         ...runningState,
       }]
     case UPDATE_WIN_PERCENTAGE:
-      const filteredArr = state.filter(ant => ant?.name !== action?.payload?.name);
+      const filteredArr = state.filter((ant: { name: string }) => ant?.name !== action?.payload?.name);
       return [...filteredArr,
       {
         name: action?.payload?.name,
@@ -125,9 +125,10 @@ const AntPage = () => {
   useEffect(() => {
     const { data = { ants: [] }, fetching, error } = result;
     const { ants } = data;
-    const testRunArray = ants.map((ant, idx) => {
+    const testRunArray = ants.map((ant: { name: string }, idx: number) => {
       return { name: ant?.name, ...initState };
     });
+
     if (testRunArray.length > 0) {
       dispatch({ type: SET_TESTS, payload: { tests: testRunArray } })
     }
@@ -220,7 +221,7 @@ const AntPage = () => {
           <CalculateButton onPress={() => handlePress(state)}>
             <ButtonText>Calculate</ButtonText>
           </CalculateButton>
-          {state.sort(compare).map((test: { name: string, hasRun: boolean, runTest: boolean, winPercentage: null | number, inProgress: boolean }, idx: number) => {
+          {state.sort((compare: () => {})).map((test: { name: string, hasRun: boolean, runTest: boolean, winPercentage: null | number, inProgress: boolean }, idx: number) => {
             const { name, hasRun, runTest, winPercentage, inProgress } = test;
             return (
               <AntCalculateItem
@@ -233,7 +234,7 @@ const AntPage = () => {
           })}
         </AntRaceSection>
       </InnerScrollView>
-    </SafeContainerView>
+    </SafeContainerView >
   );
 }
 
