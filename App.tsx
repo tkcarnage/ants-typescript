@@ -1,21 +1,28 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import styled from 'styled-components';
+import AntPage from './components/AntPage';
+import { createClient, Provider } from 'urql';
 
-export default function App() {
+const client = createClient({
+  url: `https://sg-ants-server.herokuapp.com/graphql`,
+});
+
+const ContainerView = styled(View)`
+  display: flex;
+  flex: 1;
+`;
+
+const App = () => {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Provider value={client}>
+      <ContainerView>
+        <StatusBar style="auto" />
+        <AntPage />
+      </ContainerView>
+    </Provider>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
