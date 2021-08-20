@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useReducer, useEffect } from 'react';
+import React, { useReducer, useEffect, useState } from 'react';
 import { Text, View, SafeAreaView, ScrollView, ActivityIndicator, Pressable } from 'react-native';
 import { useQuery } from 'urql';
 import styled from 'styled-components';
@@ -51,6 +51,7 @@ const CalculateButton = styled(Pressable)`
   justify-content: center;
   align-items: center;
   background-color: #000000;
+  margin-bottom: 18px;
 `;
 
 const ButtonText = styled(Text)`
@@ -71,45 +72,42 @@ const AntsQuery = `
 
 const initState = {
   hasRun: false,
-  runTest: false,
+  inProgress: false,
   winPercentage: null,
 }
 
 const runningState = {
   hasRun: true,
-  runTest: true
+  inProgress: true,
 }
 
-const RUN_TESTS = 'RUN_TESTS';
+const completedState = {
+  hasRun: true,
+  inProgress: false,
+}
+
+const SET_TESTS = 'SET_TESTS';
 const UPDATE_WIN_PERCENTAGE = 'UPDATE_WIN_PERCENTAGE';
+const RUN_TESTS = 'RUN_TESTS';
 // reducer
 const reducer = (state, action) => {
-  console.log('reducer state-->', state);
   switch (action.type) {
-    case 'SET_TESTS':
+    case SET_TESTS:
       return [...action.payload.tests];
     case RUN_TESTS:
-      console.log('run test state-->', state.map((ant) => {
-        return { name: ant?.name, ...runningState }
-      }))
-      return state.map((ant) => {
-        return { name: ant?.name, ...runningState }
-      });
-    case UPDATE_WIN_PERCENTAGE:
-      const filteredArr = state.filter(ant => ant?.name !== action?.payload?.name);
-      console.log('update win percentage -->', [...filteredArr,
+      const arr = state.filter(ant => ant?.name !== action?.payload?.name);
+      return [...arr,
       {
         name: action?.payload?.name,
-        hasRun: true,
-        runTest: false,
-        winPercentage: (action?.payload?.winPercentage * 100).toFixed(2),
-      }])
+        ...runningState,
+      }]
+    case UPDATE_WIN_PERCENTAGE:
+      const filteredArr = state.filter(ant => ant?.name !== action?.payload?.name);
       return [...filteredArr,
       {
         name: action?.payload?.name,
-        hasRun: true,
-        runTest: false,
-        winPercentage: (action?.payload?.winPercentage * 100).toFixed(2),
+        winPercentage: (action?.payload?.winPercentage * 100),
+        ...completedState,
       }]
   }
 }
@@ -119,27 +117,36 @@ const AntPage = () => {
     query: AntsQuery,
   });
 
-  const { data = { ants: [] }, fetching, error } = result;
+  const [state, dispatch] = useReducer(reducer, []);
+  const { data, fetching, error } = result;
+  const ants = data?.ants || []
 
-  const { ants } = data;
+  // when ants array becomes filled from fetch run set_tests reducer
+  useEffect(() => {
+    const { data = { ants: [] }, fetching, error } = result;
+    const { ants } = data;
+    const testRunArray = ants.map((ant, idx) => {
+      return { name: ant?.name, ...initState };
+    });
+    if (testRunArray.length > 0) {
+      dispatch({ type: SET_TESTS, payload: { tests: testRunArray } })
+    }
 
-  const testRunArray = ants.map((ant, idx) => {
-    return { name: ant?.name, ...initState };
-  });
-
-  const [state, dispatch] = useReducer(reducer, testRunArray);
+  }, [ants])
 
 
   //actions
-  const startTests = () => {
-    dispatch({ type: RUN_TESTS });
-  }
-
-  // curry
+  // curry for callback since we can't modifiy algo
   const updateWinPercentage = (name: string) => {
     return (winPercentage: number) => dispatch({ type: UPDATE_WIN_PERCENTAGE, payload: { name, winPercentage } });
   }
 
+  const setRunningTest = (name: string) => {
+    dispatch({ type: RUN_TESTS, payload: { name } });
+  }
+
+
+  // short circuit for loading and error
   if (fetching) {
     return (
       <Center>
@@ -154,6 +161,40 @@ const AntPage = () => {
         <ErrorMessage>Error: {error}</ErrorMessage>
       </Center>
     )
+  }
+
+  // sort function
+  const compare = (a: { winPercentage: number }, b: { winPercentage: number }) => {
+    if (a?.winPercentage > b?.winPercentage) {
+      return -1;
+    }
+    if (b?.winPercentage > a?.winPercentage) {
+      return 1;
+    }
+  }
+
+  // ant-win algo
+  function generateAntWinLikelihoodCalculator() {
+    const delay = 7000 + Math.random() * 7000;
+    const likelihoodOfAntWinning = Math.random();
+
+    return (callback) => {
+      setTimeout(() => {
+        callback(likelihoodOfAntWinning);
+      }, delay);
+    };
+  }
+
+
+
+  const handlePress = (stateArr: []) => {
+    stateArr.forEach((element: { name: string }, idx: number) => {
+      // need new instance of asyncWinCallback for different numbers in closure
+      setRunningTest(element.name)
+      const asyncWinCallback = generateAntWinLikelihoodCalculator();
+      const dispatchUpdateWinPercentage = updateWinPercentage(element.name);
+      asyncWinCallback(dispatchUpdateWinPercentage);
+    })
   }
 
   return (
@@ -176,19 +217,18 @@ const AntPage = () => {
         </AntInfoSection>
         <AntRaceSection>
           <SectionTitle>Ant Win Calculator</SectionTitle>
-          <CalculateButton onPress={() => startTests()}>
+          <CalculateButton onPress={() => handlePress(state)}>
             <ButtonText>Calculate</ButtonText>
           </CalculateButton>
-          {state.map((test: { name: string, hasRun: boolean, runTest: boolean, winPercentage: null | number }, idx: number) => {
-            const { name, hasRun, runTest, winPercentage } = test;
+          {state.sort(compare).map((test: { name: string, hasRun: boolean, runTest: boolean, winPercentage: null | number, inProgress: boolean }, idx: number) => {
+            const { name, hasRun, runTest, winPercentage, inProgress } = test;
             return (
               <AntCalculateItem
                 key={`${name}-${idx}`}
                 antName={name}
                 hasRun={hasRun}
-                runTest={runTest}
                 winPercentage={winPercentage}
-                updateWinPercentage={updateWinPercentage}
+                inProgress={inProgress}
               />)
           })}
         </AntRaceSection>

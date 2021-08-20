@@ -18,57 +18,37 @@ const RightContent = styled(View)`
   flex: 1;
 `;
 
-const NotRanText = styled(Text)``;
+const NotRanText = styled(Text)`
+  font-weight: bold;
+`;
 
-const InProgressText = styled(Text)``;
+const InProgressText = styled(Text)`
+  font-weight: bold;
+`;
 
-const WinPercentageText = styled(Text)``;
+const WinPercentageText = styled(Text)`
+  font-weight: bold;
+`;
 
 const AntCalculateItem = ({
   antName,
   hasRun,
-  runTest,
   winPercentage,
-  updateWinPercentage,
+  inProgress,
 }: {
   antName: string,
   hasRun: boolean,
-  runTest: boolean,
   winPercentage: null | number,
-  updateWinPercentage: any
+  inProgress: boolean
 }
 ) => {
-  console.log('runTest-->', runTest)
-  function generateAntWinLikelihoodCalculator() {
-    const delay = 7000 + Math.random() * 7000;
-    const likelihoodOfAntWinning = Math.random();
-
-    return (callback) => {
-      setTimeout(() => {
-        callback(likelihoodOfAntWinning);
-      }, delay);
-    };
-  }
-
-  const asyncWinCallback = generateAntWinLikelihoodCalculator();
-
-  useEffect(() => {
-    (async () => {
-      if (runTest) {
-        console.log('running test on-->', antName)
-        const dispatchUpdateWinPercentage = updateWinPercentage(antName);
-        asyncWinCallback(dispatchUpdateWinPercentage);
-      }
-    })()
-  }, [runTest])
-
   return (
     <TestCaseContainer>
-      <AntName>{antName}</AntName>
+      <AntName>{antName}:</AntName>
       <RightContent>
         {!hasRun && <NotRanText>Not yet run...</NotRanText>}
-        {!winPercentage && hasRun && <InProgressText>In Progress...</InProgressText>}
-        {winPercentage && <WinPercentageText>Calculated: {winPercentage}% </WinPercentageText>}
+        {!winPercentage && inProgress && <InProgressText>In Progress...</InProgressText>}
+        {winPercentage && <WinPercentageText>Calculated: {winPercentage.toFixed(2)}% </WinPercentageText>}
       </RightContent>
     </TestCaseContainer>
   );
