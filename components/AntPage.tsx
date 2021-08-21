@@ -59,6 +59,7 @@ const CalculateButton = styled(TouchableOpacity)`
   align-items: center;
   background-color: #00916E;
   margin-bottom: 18px;
+  opacity: ${({disabled}) =>  disabled ? '0.5' : '1'};
 `;
 
 const ButtonText = styled(Text)`
@@ -158,6 +159,7 @@ const AntPage = () => {
   //overall test states
   const [allTestsFinished, setAllTestsFinished] = useState(false);
   const [allTestsInProgress, setAllTestsInProgress] = useState(false);
+  const [disableButton, setDisableButton] = useState(false);
 
   useEffect(() => {
     const antsFinished = state.filter(ant => {
@@ -171,6 +173,7 @@ const AntPage = () => {
     if (lengthCheck) {
       setAllTestsFinished(true);
       setAllTestsInProgress(false);
+      setDisableButton(false);
     }
   }, [state])
 
@@ -227,10 +230,12 @@ const AntPage = () => {
 
   /* 
     TODO:
-    Make reset reducer, action, add it to handlePress to reset state. 
+    Make reset reducer, action, add it to handlePress to reset state for ants. 
   */
   const handlePress = (stateArr: []) => {
     setAllTestsInProgress(true);
+    setDisableButton(true);
+    setAllTestsFinished(false);
     stateArr.forEach((element: { name: string }, idx: number) => {
       // need new instance of asyncWinCallback for different numbers in closure
       setRunningTest(element.name)
@@ -265,7 +270,7 @@ const AntPage = () => {
           {notStartedAllTests && <TestRunStatus>All tests not yet run...</TestRunStatus>}
           {allTestsInProgress && <TestRunStatus>All tests in progress...</TestRunStatus>}
           {allTestsFinished && <TestRunStatus>All tests finished!</TestRunStatus>}
-          <CalculateButton onPress={() => handlePress(state)}>
+          <CalculateButton onPress={() => handlePress(state)} disabled={disableButton}>
             <ButtonText>Calculate</ButtonText>
           </CalculateButton>
           {state.sort(compare).map((test: { name: string, hasRun: boolean, winPercentage: null | number, inProgress: boolean }, idx: number) => {
