@@ -58,6 +58,17 @@ const ButtonText = styled(Text)`
   color: #ffffff;
 `;
 
+const TestRunStatus = styled(Text)`
+  font-size: 16px;
+  text-align: center;
+  padding-bottom: 20px;
+`;
+
+
+
+
+
+// constants for state and query
 // graphql query
 const AntsQuery = `
   query {
@@ -113,15 +124,16 @@ const reducer = (state, action) => {
 }
 
 const AntPage = () => {
+  const [state, dispatch] = useReducer(reducer, []);
+
+  // Query results
   const [result, reexecuteQuery] = useQuery({
     query: AntsQuery,
   });
-
-  const [state, dispatch] = useReducer(reducer, []);
   const { data, fetching, error } = result;
   const ants = data?.ants || []
 
-  // when ants array becomes filled from fetch run set_tests reducer
+  // when ants array changes from fetch run set_tests reducer
   useEffect(() => {
     const { data = { ants: [] }, fetching, error } = result;
     const { ants } = data;
@@ -134,6 +146,25 @@ const AntPage = () => {
     }
 
   }, [ants])
+
+  //overall test states
+  const [allTestsFinished, setAllTestsFinished] = useState(false);
+  const [allTestsInProgress, setAllTestsInProgress] = useState(false);
+
+  useEffect(() => {
+    const antsFinished = state.filter(ant => {
+      const finished = ant?.hasRun && !ant?.inProgress;
+      if(finished) {
+        return 1;
+      }
+    })
+    // check if all ants are finished
+    const lengthCheck = antsFinished.length === state.length && state.length > 0 && antsFinished.length > 0;
+    if (lengthCheck) {
+      setAllTestsFinished(true);
+      setAllTestsInProgress(false);
+    }
+  }, [state])
 
 
   //actions
@@ -189,6 +220,7 @@ const AntPage = () => {
 
 
   const handlePress = (stateArr: []) => {
+    setAllTestsInProgress(true);
     stateArr.forEach((element: { name: string }, idx: number) => {
       // need new instance of asyncWinCallback for different numbers in closure
       setRunningTest(element.name)
@@ -197,6 +229,8 @@ const AntPage = () => {
       asyncWinCallback(dispatchUpdateWinPercentage);
     })
   }
+
+  const notStartedAllTests = !allTestsFinished && !allTestsInProgress
 
   return (
     <SafeContainerView>
@@ -218,6 +252,9 @@ const AntPage = () => {
         </AntInfoSection>
         <AntRaceSection>
           <SectionTitle>Ant Win Calculator</SectionTitle>
+          {notStartedAllTests && <TestRunStatus>All tests not yet run...</TestRunStatus>}
+          {allTestsInProgress && <TestRunStatus>All tests in progress...</TestRunStatus>}
+          {allTestsFinished && <TestRunStatus>All tests finished!</TestRunStatus>}
           <CalculateButton onPress={() => handlePress(state)}>
             <ButtonText>Calculate</ButtonText>
           </CalculateButton>
