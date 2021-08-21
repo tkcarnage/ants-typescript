@@ -11,11 +11,10 @@ const SafeContainerView = styled(SafeAreaView)`
 `;
 
 const InnerScrollView = styled(ScrollView)`
-  flex: 1;
+  flex-grow: 1;
 `;
 
 const AntInfoSection = styled(View)`
-  flex: 1;
   padding-vertical: 18px;
   padding-horizontal: 36px;
 `;
@@ -29,7 +28,6 @@ const SectionTitle = styled(Text)`
 `;
 
 const AntRaceSection = styled(View)`
-  flex: 1;
   padding-vertical: 18px;
   padding-horizontal: 18px;
   margin-horizontal: 36px;
@@ -38,6 +36,7 @@ const AntRaceSection = styled(View)`
   border-top-left-radius: 8px;
   border-bottom-right-radius: 8px;
   border-bottom-left-radius: 8px;
+  min-height: 500px;
 `;
 
 const Center = styled(View)`
@@ -237,7 +236,7 @@ const AntPage = () => {
     setDisableButton(true);
     setAllTestsFinished(false);
     stateArr.forEach((element: { name: string }, idx: number) => {
-      // need new instance of asyncWinCallback for different numbers in closure
+      // need new instance of asyncWinCallback for different random numbers in closure
       setRunningTest(element.name)
       const asyncWinCallback = generateAntWinLikelihoodCalculator();
       const dispatchUpdateWinPercentage = updateWinPercentage(element.name);

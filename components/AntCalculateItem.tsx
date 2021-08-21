@@ -7,11 +7,19 @@ const TestCaseContainer = styled(View)`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding-vertical: 18px;
+  padding: 8px;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
+  color: #ffffff;
+  margin-bottom: 8px;
+  background-color: ${({ inProgress, winPercentage }) => inProgress ? 'rgba(0, 145, 110, 0.4)' : (winPercentage ? 'rgba(0, 145, 110, 0.8)' :'#e1e1e1')};
 `;
 
 const AntName = styled(Text)`
   flex: 1;
+  margin-right: 4px;
 `;
 
 const RightContent = styled(View)`
@@ -43,11 +51,9 @@ const AntCalculateItem = ({
 }
 ) => {
   return (
-    <TestCaseContainer>
-      <AntName>{antName}:</AntName>
-      <RightContent 
-        inProgress={inProgress} 
-        winPercentage={winPercentage}>
+    <TestCaseContainer inProgress={inProgress} winPercentage={winPercentage}>
+      <AntName numberOfLines={1}>{antName}:</AntName>
+      <RightContent>
         {!hasRun && <NotRanText>Not yet run...</NotRanText>}
         {!winPercentage && inProgress && <InProgressText>In Progress...</InProgressText>}
         {winPercentage && <WinPercentageText>Calculated: {winPercentage.toFixed(2)}% </WinPercentageText>}
