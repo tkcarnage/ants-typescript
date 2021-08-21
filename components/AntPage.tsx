@@ -109,7 +109,9 @@ const SET_TESTS = 'SET_TESTS';
 const UPDATE_WIN_PERCENTAGE = 'UPDATE_WIN_PERCENTAGE';
 const RUN_TESTS = 'RUN_TESTS';
 // reducer
-const reducer = (state, action) => {
+const reducer = (state: [], 
+    action: { type: string, payload: { tests: [], name: string, winPercentage: number}}
+  ) => {
   switch (action.type) {
     case SET_TESTS:
       return [...action.payload.tests];
