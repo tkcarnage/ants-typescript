@@ -45,7 +45,9 @@ const AntCalculateItem = ({
   return (
     <TestCaseContainer>
       <AntName>{antName}:</AntName>
-      <RightContent>
+      <RightContent 
+        inProgress={inProgress} 
+        winPercentage={winPercentage}>
         {!hasRun && <NotRanText>Not yet run...</NotRanText>}
         {!winPercentage && inProgress && <InProgressText>In Progress...</InProgressText>}
         {winPercentage && <WinPercentageText>Calculated: {winPercentage.toFixed(2)}% </WinPercentageText>}

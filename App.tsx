@@ -12,6 +12,7 @@ const client = createClient({
 const ContainerView = styled(View)`
   display: flex;
   flex: 1;
+  background-color: #e1e1e1;
 `;
 
 const App = () => {

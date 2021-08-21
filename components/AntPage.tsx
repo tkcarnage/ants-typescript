@@ -25,12 +25,19 @@ const SectionTitle = styled(Text)`
   font-weight: bold;
   text-align: center;
   margin-bottom: 25px;
+  color: #00916E;
 `;
 
 const AntRaceSection = styled(View)`
   flex: 1;
   padding-vertical: 18px;
-  padding-horizontal: 36px;
+  padding-horizontal: 18px;
+  margin-horizontal: 36px;
+  background-color: #f6f6f6;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
 `;
 
 const Center = styled(View)`
@@ -50,11 +57,12 @@ const CalculateButton = styled(TouchableOpacity)`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #000000;
+  background-color: #00916E;
   margin-bottom: 18px;
 `;
 
 const ButtonText = styled(Text)`
+  font-size: 16px;
   color: #ffffff;
 `;
 
@@ -217,8 +225,10 @@ const AntPage = () => {
     };
   }
 
-
-
+  /* 
+    TODO:
+    Make reset reducer, action, add it to handlePress to reset state. 
+  */
   const handlePress = (stateArr: []) => {
     setAllTestsInProgress(true);
     stateArr.forEach((element: { name: string }, idx: number) => {

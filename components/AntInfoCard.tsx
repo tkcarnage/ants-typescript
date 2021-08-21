@@ -6,10 +6,14 @@ import styled from 'styled-components';
 const Card = styled(View)`
   color: black;
   flex-direction: row;
-  background-color: #f0f0f0f0
+  background-color: #f6f6f6;
   padding: 16px;
   margin-bottom: 8px;
   font-size: 16px;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
 `;
 
 const NameText = styled(Text)``;
