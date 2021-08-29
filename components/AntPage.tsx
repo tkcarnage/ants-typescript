@@ -94,7 +94,7 @@ const TopSection = styled(View)`
   width: 100%;
   background-color: #ffffff;
   padding-vertical: 24px;
-  padding-horizontal: 4px;
+  padding-horizontal: 8px;
 `;
 
 // constants for state and query
