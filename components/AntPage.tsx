@@ -1,12 +1,19 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useReducer, useEffect, useState } from 'react';
+import React, { 
+  useReducer, 
+  useEffect, 
+  useState, 
+  useContext 
+} from 'react';
 import { Text, View, SafeAreaView, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { stringifyVariables, useQuery } from 'urql';
 import styled from 'styled-components';
 import AntInfoCard from './AntInfoCard';
 import AntCalculateItem from './AntCalculateItem';
+import Logout from './Logout';
+import AntCarousel from './AntCarousel';
 
-const SafeContainerView = styled(SafeAreaView)`
+const ContainerView = styled(View)`
   flex: 1;
 `;
 
@@ -19,12 +26,19 @@ const AntInfoSection = styled(View)`
   padding-horizontal: 36px;
 `;
 
+const WelcomeTitle = styled(Text)`
+  font-size: 24px;
+  color: #00916E;
+  font-weight: bold;
+  flex: 1;
+`;
+
 const SectionTitle = styled(Text)`
-  font-size: 25px;
+  font-size: 24px;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 25px;
   color: #00916E;
+  margin-bottom: 8px;
 `;
 
 const AntRaceSection = styled(View)`
@@ -36,7 +50,6 @@ const AntRaceSection = styled(View)`
   border-top-left-radius: 8px;
   border-bottom-right-radius: 8px;
   border-bottom-left-radius: 8px;
-  min-height: 500px;
 `;
 
 const Center = styled(View)`
@@ -72,9 +85,17 @@ const TestRunStatus = styled(Text)`
   padding-bottom: 20px;
 `;
 
-
-
-
+const TopSection = styled(View)`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 25px;
+  width: 100%;
+  background-color: #ffffff;
+  padding-vertical: 24px;
+  padding-horizontal: 4px;
+`;
 
 // constants for state and query
 // graphql query
@@ -108,6 +129,7 @@ const completedState = {
 const SET_TESTS = 'SET_TESTS';
 const UPDATE_WIN_PERCENTAGE = 'UPDATE_WIN_PERCENTAGE';
 const RUN_TESTS = 'RUN_TESTS';
+
 // reducer
 const reducer = (state: [], 
     action: { type: string, payload: { tests: [], name: string, winPercentage: number}}
@@ -133,7 +155,8 @@ const reducer = (state: [],
   }
 }
 
-const AntPage = () => {
+const AntPage = ({ handleLogOut, username }: { username: string }) => {
+  // state
   const [state, dispatch] = useReducer(reducer, []);
 
   // Query results
@@ -142,7 +165,6 @@ const AntPage = () => {
   });
   const { data, fetching, error } = result;
   const ants = data?.ants || []
-
   // when ants array changes from fetch run set_tests reducer
   useEffect(() => {
     const { data = { ants: [] }, fetching, error } = result;
@@ -164,13 +186,11 @@ const AntPage = () => {
 
   useEffect(() => {
     const antsFinished = state.filter(ant => {
-      const finished = ant?.hasRun && !ant?.inProgress;
-      if(finished) {
-        return 1;
-      }
+      const finished = ant?.hasRun && !ant?.inProgress && ant?.winPercentage;
+      return finished && ant
     })
     // check if all ants are finished
-    const lengthCheck = antsFinished.length === state.length && state.length > 0 && antsFinished.length > 0;
+    const lengthCheck = antsFinished.length === state.length && antsFinished.length > 0;
     if (lengthCheck) {
       setAllTestsFinished(true);
       setAllTestsInProgress(false);
@@ -187,24 +207,6 @@ const AntPage = () => {
 
   const setRunningTest = (name: string) => {
     dispatch({ type: RUN_TESTS, payload: { name } });
-  }
-
-
-  // short circuit for loading and error
-  if (fetching) {
-    return (
-      <Center>
-        <ActivityIndicator size="large" />
-      </Center>
-    )
-  }
-
-  if (error) {
-    return (
-      <Center>
-        <ErrorMessage>Error: {error}</ErrorMessage>
-      </Center>
-    )
   }
 
   // sort function
@@ -246,13 +248,34 @@ const AntPage = () => {
     })
   }
 
-  const notStartedAllTests = !allTestsFinished && !allTestsInProgress
+  const notStartedAllTests = !allTestsFinished && !allTestsInProgress;
+
+  // short circuit for loading, and error
+  if (fetching) {
+    return (
+      <Center>
+        <ActivityIndicator size="large" />
+      </Center>
+    )
+  }
+
+  if (error) {
+    return (
+      <Center>
+        <ErrorMessage>Error: {error}</ErrorMessage>
+      </Center>
+    )
+  }
 
   return (
-    <SafeContainerView>
-      <InnerScrollView>
+    <ContainerView>
+      <InnerScrollView stickyHeaderIndices={[0]}>
+        <TopSection>
+          <WelcomeTitle numberOfLines={1}>{`Welcome! ${username}`}</WelcomeTitle>
+          <Logout handleLogOut={handleLogOut} />
+        </TopSection>
         <AntInfoSection>
-          <SectionTitle>Our Contestants</SectionTitle>
+          <SectionTitle>The Contestants</SectionTitle>
           {ants.map((antInfo: { name: string, color: string, length: number, weight: number }, idx: number) => {
             const { name, color, length, weight } = antInfo;
             return (
@@ -286,8 +309,9 @@ const AntPage = () => {
               />)
           })}
         </AntRaceSection>
+        <AntCarousel ants={ants}/>
       </InnerScrollView>
-    </SafeContainerView >
+    </ContainerView>
   );
 }
 

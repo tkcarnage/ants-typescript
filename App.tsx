@@ -1,8 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import styled from 'styled-components';
-import AntPage from './components/AntPage';
+import Nav from './components/Nav';
+import UserContextProvider from './components/UserContextProvider';
 import { createClient, Provider } from 'urql';
 
 const client = createClient({
@@ -20,7 +21,9 @@ const App = () => {
     <Provider value={client}>
       <ContainerView>
         <StatusBar style="auto" />
-        <AntPage />
+        <UserContextProvider>
+          <Nav />
+        </UserContextProvider>
       </ContainerView>
     </Provider>
   );
