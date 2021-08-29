@@ -1,4 +1,4 @@
-# stadium-goods
+# ants-typescript
 1. git clone
 2. npm install --global expo-cli
 3. yarn install
